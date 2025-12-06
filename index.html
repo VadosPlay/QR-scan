@@ -7,22 +7,30 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h1>QR Security Check</h1>
 
-  <div class="scan-section">
-    <h2>Проверка QR-кода</h2>
-    <input type="file" id="fileInput" accept="image/*">
-    <button id="scanCamera">Сканировать камерой</button>
-    <button id="pasteBtn">Вставить из буфера</button>
-  </div>
+<div class="wrapper">
+    <h1 class="title">QR Security Check</h1>
 
-  <video id="cameraStream" autoplay playsinline></video>
+    <div class="card">
+        <h2>Проверка QR-кода</h2>
 
-  <div class="result" id="resultBox">Здесь будет результат</div>
+        <label class="file-input">
+            <input type="file" id="fileInput" accept="image/*">
+            <span>📁 Загрузить изображение</span>
+        </label>
 
-  <h2>История проверок</h2>
-  <ul id="history"></ul>
+        <button id="scanCamera" class="btn">📷 Сканировать камерой</button>
+        <button id="pasteBtn" class="btn">📋 Вставить из буфера</button>
+
+        <video id="cameraStream" autoplay playsinline></video>
+
+        <div id="resultBox" class="result">Здесь будет результат</div>
+    </div>
+
+    <div class="card history-card">
+        <h2>История проверок</h2>
+        <ul id="history" class="history-list"></ul>
+    </div>
 </div>
 
 <script src="jsQR.js"></script>
