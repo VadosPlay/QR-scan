@@ -19,8 +19,12 @@
             <span>📁 Загрузить изображение</span>
         </label>
 
-        <button id="scanCamera" class="btn">📷 Сканировать камерой</button>
-        <button id="pasteBtn" class="btn">📋 Вставить из буфера</button>
+        <!-- ПК -->
+        <button id="pasteText" class="btn desktop-only">📋 Вставить ссылку из буфера</button>
+        <button id="pasteImage" class="btn desktop-only">🖼 Вставить изображение из буфера</button>
+
+        <!-- Телефон -->
+        <button id="scanCamera" class="btn mobile-only">📷 Сканировать камерой</button>
 
         <video id="cameraStream" autoplay playsinline></video>
 
