@@ -5,9 +5,11 @@ const pasteBtn = document.getElementById("pasteBtn");
 const cameraBtn = document.getElementById("cameraBtn");
 const cameraBox = document.getElementById("cameraBox");
 const video = document.getElementById("video");
+const captureBtn = document.getElementById("captureBtn");
+
+let cameraStream = null;
 
 /* ---------- Функции ---------- */
-
 function showResult(text, status = "yellow") {
     resultBox.textContent = text;
     resultBox.className = "result " + status;
@@ -31,8 +33,7 @@ function analyzeText(data) {
     }
 }
 
-/* ---------- FILE UPLOAD ---------- */
-
+/* ---------- Загрузка файла ---------- */
 fileInput.addEventListener("change", function () {
     const file = fileInput.files[0];
     if (!file) return;
@@ -44,8 +45,7 @@ fileInput.addEventListener("change", function () {
     reader.readAsDataURL(file);
 });
 
-/* ---------- SCAN FROM IMAGE ---------- */
-
+/* ---------- Обработка изображения ---------- */
 function processImage(imgUrl) {
     const img = new Image();
     img.src = imgUrl;
@@ -56,16 +56,15 @@ function processImage(imgUrl) {
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
 
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imgData.data, canvas.width, canvas.height);
 
         if (code) analyzeText(code.data);
         else showResult("QR-код не найден", "red");
     };
 }
 
-/* ---------- PASTE FROM CLIPBOARD (PC) ---------- */
-
+/* ---------- Вставка из буфера (ПК) ---------- */
 if (pasteBtn) {
     pasteBtn.addEventListener("click", async () => {
         try {
@@ -83,8 +82,7 @@ if (pasteBtn) {
                     return analyzeText(data);
                 }
             }
-
-            showResult("Буфер пуст или содержит не поддерживаемый формат", "red");
+            showResult("Буфер пуст или не поддерживает формат", "red");
 
         } catch (err) {
             showResult("Ошибка доступа к буферу", "red");
@@ -92,23 +90,17 @@ if (pasteBtn) {
     });
 }
 
-/* ---------- CAMERA AUTO SCAN (MOBILE) ---------- */
-
-let scanning = false;
-
+/* ---------- Камера (телефон) ---------- */
 cameraBtn?.addEventListener("click", async () => {
     cameraBox.classList.remove("hidden");
-
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-    video.srcObject = stream;
-
-    scanning = true;
-    autoScanLoop();
+    if (!cameraStream) {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = cameraStream;
+    }
 });
 
-function autoScanLoop() {
-    if (!scanning) return;
-
+/* ---------- Кнопка съёмки QR ---------- */
+captureBtn?.addEventListener("click", () => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -116,16 +108,12 @@ function autoScanLoop() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
 
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(img.data, canvas.width, canvas.height);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imgData.data, canvas.width, canvas.height);
 
     if (code) {
-        scanning = false;
-        video.srcObject.getTracks().forEach(t => t.stop());
         analyzeText(code.data);
-        cameraBox.classList.add("hidden");
-        return;
+    } else {
+        showResult("QR-код не найден", "red");
     }
-
-    requestAnimationFrame(autoScanLoop);
-}
+});
