@@ -89,10 +89,6 @@ video {
   display: none;
 }
 
-.history-card h2 {
-  margin-bottom: 10px;
-}
-
 .history-list {
   list-style: none;
   padding: 0;
@@ -106,4 +102,13 @@ video {
   border-radius: 10px;
   margin-bottom: 8px;
   font-size: 14px;
+}
+
+/* АДАПТИВНОСТЬ */
+.mobile-only { display: none; }
+.desktop-only { display: block; }
+
+@media (max-width: 768px) {
+  .mobile-only { display: block; }
+  .desktop-only { display: none; }
 }
