@@ -1,0 +1,20 @@
+body {
+  background: #111;
+  color: #eee;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+.container { max-width: 600px; margin: auto; }
+.scan-section button, input {
+  margin: 5px 0; padding: 10px; width: 100%;
+  background: #222; border: 1px solid #444; color: #fff;
+}
+.result {
+  margin-top: 20px; padding: 15px; border-radius: 5px;
+  background: #222; border: 1px solid #444;
+}
+.result.safe { border-color: green; }
+.result.warning { border-color: yellow; }
+.result.danger { border-color: red; }
+video { width: 100%; display: none; margin-top: 10px; }
