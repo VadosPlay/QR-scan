@@ -1,9 +1,14 @@
 const fileInput = document.getElementById('fileInput');
 const scanCameraBtn = document.getElementById('scanCamera');
-const pasteBtn = document.getElementById('pasteBtn');
+const pasteTextBtn = document.getElementById('pasteText');
+const pasteImageBtn = document.getElementById('pasteImage');
 const resultBox = document.getElementById('resultBox');
 const historyList = document.getElementById('history');
 const video = document.getElementById('cameraStream');
+
+let cameraStream = null;
+
+/* =============== ФУНКЦИИ =============== */
 
 function setResult(text, level) {
   resultBox.textContent = text;
@@ -27,15 +32,23 @@ function analyze(text) {
   if (url.startsWith("https://"))
     setResult("Безопасно: " + url, "safe");
   else if (url.startsWith("http://"))
-    setResult("Подозрительно (нет HTTPS): " + url, "warning");
+    setResult("Подозрительно: " + url, "warning");
   else
     setResult("Неизвестный формат: " + url, "warning");
 }
+
+/* =============== 1. ЗАГРУЗКА ФАЙЛА =============== */
 
 fileInput.onchange = () => {
   const file = fileInput.files[0];
   if (!file) return;
 
+  readImage(file);
+};
+
+/* =============== ВСПОМОГАТЕЛЬНОЕ СКАНИРОВАНИЕ КАРТИНКИ =============== */
+
+function readImage(file) {
   const img = new Image();
   img.src = URL.createObjectURL(file);
 
@@ -53,20 +66,39 @@ fileInput.onchange = () => {
     if (qr) analyze(qr.data);
     else setResult("QR-код не найден", "danger");
   };
-};
+}
 
-pasteBtn.onclick = async () => {
-  const text = await navigator.clipboard.readText();
+/* =============== 2. ВСТАВКА ТЕКСТА ИЗ БУФЕРА (ПК) =============== */
+
+pasteTextBtn.onclick = async () => {
+  let text = await navigator.clipboard.readText();
   if (text) analyze(text);
 };
 
+/* =============== 3. ВСТАВКА ИЗОБРАЖЕНИЯ ИЗ БУФЕРА (ПК) =============== */
+
+pasteImageBtn.onclick = async () => {
+  const items = await navigator.clipboard.read();
+  for (const item of items) {
+    if (item.types.includes("image/png") || item.types.includes("image/jpeg")) {
+      const blob = await item.getType(item.types[0]);
+      readImage(blob);
+      return;
+    }
+  }
+  setResult("В буфере нет изображения", "warning");
+};
+
+/* =============== 4. СКАНИРОВАНИЕ ЧЕРЕЗ КАМЕРУ (ТЕЛЕФОН) =============== */
+
 scanCameraBtn.onclick = async () => {
   video.style.display = 'block';
-  let stream = await navigator.mediaDevices.getUserMedia({
+
+  cameraStream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" }
   });
 
-  video.srcObject = stream;
+  video.srcObject = cameraStream;
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -81,13 +113,13 @@ scanCameraBtn.onclick = async () => {
     const qr = jsQR(data.data, canvas.width, canvas.height);
 
     if (qr) {
-      stream.getTracks().forEach(t => t.stop());
+      cameraStream.getTracks().forEach(t => t.stop());
       video.style.display = 'none';
       analyze(qr.data);
       return;
     }
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(loop); // продолжать сканировать
   }
 
   requestAnimationFrame(loop);
