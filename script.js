@@ -8,8 +8,9 @@ const video = document.getElementById("video");
 const captureBtn = document.getElementById("captureBtn");
 
 let cameraStream = null;
+let cameraActive = false;
 
-/* ---------- Функции ---------- */
+/* ---------- Результаты ---------- */
 function showResult(text, status = "yellow") {
     resultBox.textContent = text;
     resultBox.className = "result " + status;
@@ -92,15 +93,27 @@ if (pasteBtn) {
 
 /* ---------- Камера (телефон) ---------- */
 cameraBtn?.addEventListener("click", async () => {
-    cameraBox.classList.remove("hidden");
-    if (!cameraStream) {
+    if (!cameraActive) {
+        cameraBox.classList.remove("hidden");
         cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         video.srcObject = cameraStream;
+        cameraActive = true;
+        cameraBtn.textContent = "Выключить камеру";
+    } else {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        video.srcObject = null;
+        cameraBox.classList.add("hidden");
+        cameraActive = false;
+        cameraBtn.textContent = "Включить камеру";
     }
 });
 
 /* ---------- Кнопка съёмки QR ---------- */
 captureBtn?.addEventListener("click", () => {
+    if (!cameraActive) return;
+
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
