@@ -1,114 +1,83 @@
 body {
-  margin: 0;
-  background: #0d0d0f;
-  font-family: "Segoe UI", Arial, sans-serif;
-  color: #eee;
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.wrapper {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+.container {
+    max-width: 520px;
+    margin: auto;
+    padding: 20px;
 }
 
-.title {
-  text-align: center;
-  font-size: 32px;
-  margin-bottom: 20px;
-  color: #7ab8ff;
+h1, h2 { text-align: center; }
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.card {
-  background: #1a1a1d;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 14px;
-  box-shadow: 0 0 25px rgba(0,0,0,0.4);
+button, input[type="file"] {
+    background: #222;
+    color: #ddd;
+    border: 1px solid #444;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
-h2 {
-  margin-top: 0;
-  color: #9ecbff;
+button:hover {
+    background: #333;
 }
 
-.file-input {
-  display: block;
-  background: #222327;
-  padding: 12px;
-  text-align: center;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  border: 1px solid #333;
-}
-
-.file-input:hover {
-  background: #2d2f36;
-}
-
-.file-input input {
-  display: none;
-}
-
-.btn {
-  width: 100%;
-  padding: 12px;
-  background: #292b31;
-  border: 1px solid #3a3c45;
-  color: #fff;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  transition: 0.2s;
-}
-
-.btn:hover {
-  background: #33353c;
+#cameraBox video {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
 .result {
-  margin-top: 15px;
-  padding: 15px;
-  background: #222327;
-  border: 2px solid #444;
-  border-radius: 10px;
-  min-height: 40px;
-  text-align: center;
-  transition: 0.3s;
+    padding: 15px;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-/* Цвета результата */
-.result.safe { border-color: #38d47a; color: #38d47a; }
-.result.warning { border-color: #e7d45a; color: #e7d45a; }
-.result.danger { border-color: #e05757; color: #e05757; }
+.green { background: rgba(20, 120, 20, 0.6); border: 1px solid #0f0; }
+.red   { background: rgba(120, 20, 20, 0.6); border: 1px solid #f00; }
+.yellow{ background: rgba(180, 180, 20, 0.6); border: 1px solid #ff0; }
+.neutral { background: #222; border: 1px solid #444; }
 
-video {
-  width: 100%;
-  border-radius: 12px;
-  margin-top: 10px;
-  display: none;
+#historyList {
+    list-style: none;
+    padding: 0;
 }
 
-.history-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+#historyList li {
+    background: #222;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    border-left: 4px solid #555;
 }
 
-.history-list li {
-  background: #222327;
-  border: 1px solid #333;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-/* АДАПТИВНОСТЬ */
+/* ПК / Мобайл разделение */
+.pc-only { display: none; }
 .mobile-only { display: none; }
-.desktop-only { display: block; }
 
-@media (max-width: 768px) {
-  .mobile-only { display: block; }
-  .desktop-only { display: none; }
+/* PC */
+@media (min-width: 768px) {
+    .pc-only { display: block; }
 }
+
+/* Phone */
+@media (max-width: 767px) {
+    .mobile-only { display: block; }
+}
+.hidden { display: none !important; }
