@@ -10,11 +10,13 @@ function setResult(text, level) {
   resultBox.className = 'result ' + level;
 
   let li = document.createElement('li');
-  li.textContent = text + " (" + level + ")";
+  li.textContent = text;
   historyList.prepend(li);
 }
 
-function analyze(url) {
+function analyze(text) {
+  let url = text.trim();
+
   try {
     new URL(url);
   } catch {
@@ -22,22 +24,34 @@ function analyze(url) {
     return;
   }
 
-  if (url.startsWith("https://")) setResult("Безопасно: " + url, "safe");
-  else if (url.startsWith("http://")) setResult("Подозрительно: " + url, "warning");
-  else setResult("Неизвестно: " + url, "warning");
+  if (url.startsWith("https://"))
+    setResult("Безопасно: " + url, "safe");
+  else if (url.startsWith("http://"))
+    setResult("Подозрительно (нет HTTPS): " + url, "warning");
+  else
+    setResult("Неизвестный формат: " + url, "warning");
 }
 
-fileInput.onchange = async () => {
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
   const img = new Image();
-  img.src = URL.createObjectURL(fileInput.files[0]);
+  img.src = URL.createObjectURL(file);
+
   img.onload = () => {
     const canvas = document.createElement('canvas');
-    canvas.width = img.width; canvas.height = img.height;
+    canvas.width = img.width;
+    canvas.height = img.height;
+
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
-    const qr = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const qr = jsQR(data.data, canvas.width, canvas.height);
+
     if (qr) analyze(qr.data);
-    else setResult("QR не найден", "danger");
+    else setResult("QR-код не найден", "danger");
   };
 };
 
@@ -48,16 +62,21 @@ pasteBtn.onclick = async () => {
 
 scanCameraBtn.onclick = async () => {
   video.style.display = 'block';
-  let stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+  let stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" }
+  });
+
   video.srcObject = stream;
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  function frame() {
+  function loop() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+
     ctx.drawImage(video, 0, 0);
+
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const qr = jsQR(data.data, canvas.width, canvas.height);
 
@@ -67,7 +86,9 @@ scanCameraBtn.onclick = async () => {
       analyze(qr.data);
       return;
     }
-    requestAnimationFrame(frame);
+
+    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(frame);
+
+  requestAnimationFrame(loop);
 };
