@@ -1,126 +1,131 @@
-const fileInput = document.getElementById('fileInput');
-const scanCameraBtn = document.getElementById('scanCamera');
-const pasteTextBtn = document.getElementById('pasteText');
-const pasteImageBtn = document.getElementById('pasteImage');
-const resultBox = document.getElementById('resultBox');
-const historyList = document.getElementById('history');
-const video = document.getElementById('cameraStream');
+const resultBox = document.getElementById("resultBox");
+const historyList = document.getElementById("historyList");
+const fileInput = document.getElementById("fileInput");
+const pasteBtn = document.getElementById("pasteBtn");
+const cameraBtn = document.getElementById("cameraBtn");
+const cameraBox = document.getElementById("cameraBox");
+const video = document.getElementById("video");
 
-let cameraStream = null;
+/* ---------- Функции ---------- */
 
-/* =============== ФУНКЦИИ =============== */
+function showResult(text, status = "yellow") {
+    resultBox.textContent = text;
+    resultBox.className = "result " + status;
 
-function setResult(text, level) {
-  resultBox.textContent = text;
-  resultBox.className = 'result ' + level;
-
-  let li = document.createElement('li');
-  li.textContent = text;
-  historyList.prepend(li);
+    let li = document.createElement("li");
+    li.textContent = text;
+    li.style.borderLeftColor = (status === "green") ? "#0f0" :
+                               (status === "red")   ? "#f00" : "#ff0";
+    historyList.prepend(li);
 }
 
-function analyze(text) {
-  let url = text.trim();
+function analyzeText(data) {
+    if (!data) return showResult("QR не найден", "red");
 
-  try {
-    new URL(url);
-  } catch {
-    setResult("Некорректная ссылка", "danger");
-    return;
-  }
+    let isURL = /^(https?:\/\/|www\.)/.test(data);
 
-  if (url.startsWith("https://"))
-    setResult("Безопасно: " + url, "safe");
-  else if (url.startsWith("http://"))
-    setResult("Подозрительно: " + url, "warning");
-  else
-    setResult("Неизвестный формат: " + url, "warning");
-}
-
-/* =============== 1. ЗАГРУЗКА ФАЙЛА =============== */
-
-fileInput.onchange = () => {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  readImage(file);
-};
-
-/* =============== ВСПОМОГАТЕЛЬНОЕ СКАНИРОВАНИЕ КАРТИНКИ =============== */
-
-function readImage(file) {
-  const img = new Image();
-  img.src = URL.createObjectURL(file);
-
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const qr = jsQR(data.data, canvas.width, canvas.height);
-
-    if (qr) analyze(qr.data);
-    else setResult("QR-код не найден", "danger");
-  };
-}
-
-/* =============== 2. ВСТАВКА ТЕКСТА ИЗ БУФЕРА (ПК) =============== */
-
-pasteTextBtn.onclick = async () => {
-  let text = await navigator.clipboard.readText();
-  if (text) analyze(text);
-};
-
-/* =============== 3. ВСТАВКА ИЗОБРАЖЕНИЯ ИЗ БУФЕРА (ПК) =============== */
-
-pasteImageBtn.onclick = async () => {
-  const items = await navigator.clipboard.read();
-  for (const item of items) {
-    if (item.types.includes("image/png") || item.types.includes("image/jpeg")) {
-      const blob = await item.getType(item.types[0]);
-      readImage(blob);
-      return;
+    if (isURL) {
+        showResult("Найдена ссылка:\n" + data, "green");
+    } else {
+        showResult("Текст: " + data, "yellow");
     }
-  }
-  setResult("В буфере нет изображения", "warning");
-};
+}
 
-/* =============== 4. СКАНИРОВАНИЕ ЧЕРЕЗ КАМЕРУ (ТЕЛЕФОН) =============== */
+/* ---------- FILE UPLOAD ---------- */
 
-scanCameraBtn.onclick = async () => {
-  video.style.display = 'block';
+fileInput.addEventListener("change", function () {
+    const file = fileInput.files[0];
+    if (!file) return;
 
-  cameraStream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" }
-  });
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        processImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+});
 
-  video.srcObject = cameraStream;
+/* ---------- SCAN FROM IMAGE ---------- */
 
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+function processImage(imgUrl) {
+    const img = new Image();
+    img.src = imgUrl;
+    img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-  function loop() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) analyzeText(code.data);
+        else showResult("QR-код не найден", "red");
+    };
+}
+
+/* ---------- PASTE FROM CLIPBOARD (PC) ---------- */
+
+if (pasteBtn) {
+    pasteBtn.addEventListener("click", async () => {
+        try {
+            const items = await navigator.clipboard.read();
+
+            for (let item of items) {
+                if (item.types.includes("image/png")) {
+                    const blob = await item.getType("image/png");
+                    const url = URL.createObjectURL(blob);
+                    return processImage(url);
+                }
+                if (item.types.includes("text/plain")) {
+                    const text = await item.getType("text/plain");
+                    const data = await text.text();
+                    return analyzeText(data);
+                }
+            }
+
+            showResult("Буфер пуст или содержит не поддерживаемый формат", "red");
+
+        } catch (err) {
+            showResult("Ошибка доступа к буферу", "red");
+        }
+    });
+}
+
+/* ---------- CAMERA AUTO SCAN (MOBILE) ---------- */
+
+let scanning = false;
+
+cameraBtn?.addEventListener("click", async () => {
+    cameraBox.classList.remove("hidden");
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    video.srcObject = stream;
+
+    scanning = true;
+    autoScanLoop();
+});
+
+function autoScanLoop() {
+    if (!scanning) return;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
     ctx.drawImage(video, 0, 0);
 
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const qr = jsQR(data.data, canvas.width, canvas.height);
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(img.data, canvas.width, canvas.height);
 
-    if (qr) {
-      cameraStream.getTracks().forEach(t => t.stop());
-      video.style.display = 'none';
-      analyze(qr.data);
-      return;
+    if (code) {
+        scanning = false;
+        video.srcObject.getTracks().forEach(t => t.stop());
+        analyzeText(code.data);
+        cameraBox.classList.add("hidden");
+        return;
     }
 
-    requestAnimationFrame(loop); // продолжать сканировать
-  }
-
-  requestAnimationFrame(loop);
-};
+    requestAnimationFrame(autoScanLoop);
+}
