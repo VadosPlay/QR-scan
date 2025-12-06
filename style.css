@@ -67,16 +67,37 @@ button:hover {
     border-left: 4px solid #555;
 }
 
-/* ПК / Мобайл разделение */
+/* Круглая кнопка камеры */
+.circle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: #38d47a;
+    color: #fff;
+    font-size: 24px;
+    margin: 10px auto 0;
+    display: block;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0,255,0,0.5);
+    transition: 0.2s;
+}
+
+.circle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(0,255,0,0.7);
+}
+
+/* ПК / Мобильные стили */
 .pc-only { display: none; }
 .mobile-only { display: none; }
 
-/* PC */
+/* ПК */
 @media (min-width: 768px) {
     .pc-only { display: block; }
 }
 
-/* Phone */
+/* Телефон */
 @media (max-width: 767px) {
     .mobile-only { display: block; }
 }
