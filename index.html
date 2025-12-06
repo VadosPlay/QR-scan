@@ -12,28 +12,25 @@
 
     <h1>QR Security Scanner</h1>
 
-    <!-- Блок кнопок -->
     <div class="actions">
-
-        <!-- Только для ПК -->
+        <!-- ПК -->
         <button id="pasteBtn" class="pc-only">Вставить из буфера</button>
 
-        <!-- Только для телефона -->
-        <button id="cameraBtn" class="mobile-only">Сканировать камерой</button>
+        <!-- Телефон -->
+        <button id="cameraBtn" class="mobile-only">Включить камеру</button>
 
         <!-- Общие -->
         <input type="file" id="fileInput" accept="image/*">
     </div>
 
-    <!-- Видео с камеры -->
+    <!-- Камера с кнопкой для мобильных -->
     <div id="cameraBox" class="mobile-only hidden">
         <video id="video" autoplay></video>
+        <button id="captureBtn" class="circle-btn">📷</button>
     </div>
 
-    <!-- Результат -->
     <div id="resultBox" class="result neutral">Ожидание данных...</div>
 
-    <!-- История -->
     <h2>История</h2>
     <ul id="historyList"></ul>
 
