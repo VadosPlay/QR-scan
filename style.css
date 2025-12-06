@@ -1,20 +1,109 @@
 body {
-  background: #111;
-  color: #eee;
-  font-family: Arial, sans-serif;
   margin: 0;
+  background: #0d0d0f;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #eee;
+}
+
+.wrapper {
+  max-width: 600px;
+  margin: 0 auto;
   padding: 20px;
 }
-.container { max-width: 600px; margin: auto; }
-.scan-section button, input {
-  margin: 5px 0; padding: 10px; width: 100%;
-  background: #222; border: 1px solid #444; color: #fff;
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #7ab8ff;
 }
+
+.card {
+  background: #1a1a1d;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 14px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.4);
+}
+
+h2 {
+  margin-top: 0;
+  color: #9ecbff;
+}
+
+.file-input {
+  display: block;
+  background: #222327;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: 1px solid #333;
+}
+
+.file-input:hover {
+  background: #2d2f36;
+}
+
+.file-input input {
+  display: none;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  background: #292b31;
+  border: 1px solid #3a3c45;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: #33353c;
+}
+
 .result {
-  margin-top: 20px; padding: 15px; border-radius: 5px;
-  background: #222; border: 1px solid #444;
+  margin-top: 15px;
+  padding: 15px;
+  background: #222327;
+  border: 2px solid #444;
+  border-radius: 10px;
+  min-height: 40px;
+  text-align: center;
+  transition: 0.3s;
 }
-.result.safe { border-color: green; }
-.result.warning { border-color: yellow; }
-.result.danger { border-color: red; }
-video { width: 100%; display: none; margin-top: 10px; }
+
+/* Цвета результата */
+.result.safe { border-color: #38d47a; color: #38d47a; }
+.result.warning { border-color: #e7d45a; color: #e7d45a; }
+.result.danger { border-color: #e05757; color: #e05757; }
+
+video {
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 10px;
+  display: none;
+}
+
+.history-card h2 {
+  margin-bottom: 10px;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-list li {
+  background: #222327;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
